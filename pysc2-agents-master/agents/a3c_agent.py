@@ -53,7 +53,7 @@ class A3CAgent(object):
       self.info = tf.placeholder(tf.float32, [None, self.isize], name='info')
 
       # Build networks
-      net = build_net(self.minimap, self.screen, self.info, self.msize, self.ssize, len(actions.FUNCTIONS), ntype)
+      net = build_net(self.minimap, self.screen, self.info, self.msize, self.ssize, len(actions.FUNCTIONS))
       self.spatial_action, self.non_spatial_action, self.value = net
 
       # Set targets and masks
@@ -63,7 +63,6 @@ class A3CAgent(object):
       self.non_spatial_action_selected = tf.placeholder(tf.float32, [None, len(actions.FUNCTIONS)], name='non_spatial_action_selected')
       self.value_target = tf.placeholder(tf.float32, [None], name='value_target')
 
-      print(self.spatial_action_selected)
       # Compute log probability
       spatial_action_prob = tf.reduce_sum(self.spatial_action * self.spatial_action_selected, axis=1)
       spatial_action_log_prob = tf.log(tf.clip_by_value(spatial_action_prob, 1e-10, 1.))
@@ -86,11 +85,12 @@ class A3CAgent(object):
 
       # TODO: policy penalty
       loss = policy_loss + value_loss
-
+      print(loss)
       # Build the optimizer
       self.learning_rate = tf.placeholder(tf.float32, None, name='learning_rate')
       opt = tf.train.RMSPropOptimizer(self.learning_rate, decay=0.99, epsilon=1e-10)
       grads = opt.compute_gradients(loss)
+      
       cliped_grad = []
       for grad, var in grads:
         self.summary.append(tf.summary.histogram(var.op.name, var))
@@ -104,9 +104,9 @@ class A3CAgent(object):
 
 
   def step(self, obs):
-    minimap = np.array(obs.observation['minimap'], dtype=np.float32)
+    minimap = np.array(obs.observation['feature_minimap'], dtype=np.float32)
     minimap = np.expand_dims(U.preprocess_minimap(minimap), axis=0)
-    screen = np.array(obs.observation['screen'], dtype=np.float32)
+    screen = np.array(obs.observation['feature_screen'], dtype=np.float32)
     screen = np.expand_dims(U.preprocess_screen(screen), axis=0)
     # TODO: only use available actions
     info = np.zeros([1, self.isize], dtype=np.float32)
@@ -155,9 +155,9 @@ class A3CAgent(object):
     if obs.last():
       R = 0
     else:
-      minimap = np.array(obs.observation['minimap'], dtype=np.float32)
+      minimap = np.array(obs.observation['feature_minimap'], dtype=np.float32)
       minimap = np.expand_dims(U.preprocess_minimap(minimap), axis=0)
-      screen = np.array(obs.observation['screen'], dtype=np.float32)
+      screen = np.array(obs.observation['feature_screen'], dtype=np.float32)
       screen = np.expand_dims(U.preprocess_screen(screen), axis=0)
       info = np.zeros([1, self.isize], dtype=np.float32)
       info[0, obs.observation['available_actions']] = 1
@@ -182,9 +182,9 @@ class A3CAgent(object):
 
     rbs.reverse()
     for i, [obs, action, next_obs] in enumerate(rbs):
-      minimap = np.array(obs.observation['minimap'], dtype=np.float32)
+      minimap = np.array(obs.observation['feature_minimap'], dtype=np.float32)
       minimap = np.expand_dims(U.preprocess_minimap(minimap), axis=0)
-      screen = np.array(obs.observation['screen'], dtype=np.float32)
+      screen = np.array(obs.observation['feature_screen'], dtype=np.float32)
       screen = np.expand_dims(U.preprocess_screen(screen), axis=0)
       info = np.zeros([1, self.isize], dtype=np.float32)
       info[0, obs.observation['available_actions']] = 1

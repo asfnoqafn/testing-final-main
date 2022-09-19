@@ -39,11 +39,11 @@ flags.DEFINE_integer("step_mul", 8, "Game steps per agent step.")
 
 flags.DEFINE_string("agent", "agents.a3c_agent.A3CAgent", "Which agent to run.")
 flags.DEFINE_string("net", "fcn", "atari or fcn.")
-flags.DEFINE_integer("max_agent_steps", 60, "Total agent steps.")
+flags.DEFINE_integer("max_agent_steps", 120, "Total agent steps.")
 
 flags.DEFINE_bool("profile", False, "Whether to turn on code profiling.")
 flags.DEFINE_bool("trace", False, "Whether to trace the code execution.")
-flags.DEFINE_integer("parallel", 16, "How many instances to run in parallel.")
+flags.DEFINE_integer("parallel", 1, "How many instances to run in parallel.")
 flags.DEFINE_bool("save_replay", False, "Whether to save a replay at the end.")
 
 FLAGS(sys.argv)
@@ -69,8 +69,11 @@ def run_thread(agent, map_name, visualize):
     map_name="DefeatZerglingsAndBanelings",
     players= [sc2_env.Agent(sc2_env.Race.protoss)],
     step_mul=FLAGS.step_mul,
-    screen_size_px=(FLAGS.screen_resolution, FLAGS.screen_resolution),
-    minimap_size_px=(FLAGS.minimap_resolution, FLAGS.minimap_resolution),
+    agent_interface_format = sc2_env.AgentInterfaceFormat(
+                            feature_dimensions=sc2_env.Dimensions(
+                            screen=FLAGS.screen_resolution,
+                            minimap=FLAGS.minimap_resolution),
+                            use_feature_units=True),
     visualize=visualize) as env:
     env = available_actions_printer.AvailableActionsPrinter(env)
 
@@ -117,11 +120,11 @@ def _main(unused_argv):
     agent.build_model(i > 0, DEVICE[i % len(DEVICE)], FLAGS.net)
     agents.append(agent)
 
-  config = tf.ConfigProto(allow_soft_placement=True)
+  config = tf.compat.v1.ConfigProto(allow_soft_placement=True)
   config.gpu_options.allow_growth = True
-  sess = tf.Session(config=config)
+  sess =  tf.compat.v1.Session(config=config)
 
-  summary_writer = tf.summary.FileWriter(LOG)
+  summary_writer = tf.summary.create_file_writer(LOG)
   for i in range(PARALLEL):
     agents[i].setup(sess, summary_writer)
 
