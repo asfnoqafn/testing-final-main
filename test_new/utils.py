@@ -12,7 +12,10 @@ _SCREEN_PLAYER_ID = features.SCREEN_FEATURES.player_id.index
 _SCREEN_UNIT_TYPE = features.SCREEN_FEATURES.unit_type.index
 
 usable_screen_features = np.array([
-  'visibility_map',
+#  'placeholder',
+#  'height_map',
+#  'visibility_map',
+#  'creep',
   'power',
   'player_id',
   'player_relative',
@@ -20,30 +23,23 @@ usable_screen_features = np.array([
   'selected',
   'unit_hit_points',
   'unit_hit_points_ratio',
-  'unit_energy',
-  'unit_energy_ratio',
+#  'unit_energy',
+#  'unit_energy_ratio',
   'unit_shields',
   'unit_shields_ratio',
   'unit_density',
-  'unit_density_aa'
+  'unit_density_aa',
+  'effects',
+#  'hallucinations',
+#  'cloaked',
+  'blip',
+#  'buffs',
+#  'buff_duration',
+  'active',
+#  'build_progress',
+#  'pathable',
+#  'buildable'
 ])
-
-def preprocess_minimap(minimap):
-  layers = []
-  assert minimap.shape[0] == len(features.MINIMAP_FEATURES)
-  for i in range(len(features.MINIMAP_FEATURES)):
-    if i == _MINIMAP_PLAYER_ID:
-      layers.append(minimap[i:i+1] / features.MINIMAP_FEATURES[i].scale)
-    elif features.MINIMAP_FEATURES[i].type == features.FeatureType.SCALAR:
-      layers.append(minimap[i:i+1] / features.MINIMAP_FEATURES[i].scale)
-    else:
-      layer = np.zeros([features.MINIMAP_FEATURES[i].scale, minimap.shape[1], minimap.shape[2]], dtype=np.float32)
-      for j in range(features.MINIMAP_FEATURES[i].scale):
-        indy, indx = (minimap[i] == j).nonzero()
-        layer[j, indy, indx] = 1
-      layers.append(layer)
-  return np.concatenate(layers, axis=0)
-
 
 def preprocess_screen(screen):
   layers = []
@@ -61,19 +57,6 @@ def preprocess_screen(screen):
           layer[j, indy, indx] = 1
         layers.append(layer)
   return np.concatenate(layers, axis=0)
-
-
-def minimap_channel():
-  c = 0
-  for i in range(len(features.MINIMAP_FEATURES)):
-    if i == _MINIMAP_PLAYER_ID:
-      c += 1
-    elif features.MINIMAP_FEATURES[i].type == features.FeatureType.SCALAR:
-      c += 1
-    else:
-      c += features.MINIMAP_FEATURES[i].scale
-  return c
-
 
 def screen_channel():
   c = 0

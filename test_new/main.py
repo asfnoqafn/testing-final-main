@@ -49,12 +49,12 @@ else:
   MAX_AGENT_STEPS = 1e5
   DEVICE = ['/cpu:0']
 
-steps_per_epoch = 200
-epochs = 100
+steps_per_epoch = 300
+epochs = 1000
 gamma = 0.99
 clip_ratio = 0.2
-policy_learning_rate = 5e-5
-value_function_learning_rate = 1e-4
+policy_learning_rate = 7e-6
+value_function_learning_rate = 1e-5
 train_policy_iterations = 75
 train_value_iterations = 75
 lam = 0.9
