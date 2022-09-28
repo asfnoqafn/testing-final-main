@@ -163,7 +163,7 @@ def train_policy(
     return kl
 
 
-def step(screen, available_actions, available_actions_one_hot):
+def step_agent(screen, available_actions, available_actions_one_hot):
     non_spatial_logits, spatial_out_logits = actor(
         screen, available_actions_one_hot)
     spatial_action = tf.squeeze(
@@ -219,7 +219,7 @@ for epoch in range(FLAGS.epochs):
             [1, len(actions.FUNCTIONS)], dtype=np.float32)
         available_actions_one_hot[0, ] = 1
 
-        func_actions, non_spatial_logits, spatial_out_logits, non_spatial_action, spatial_action, value_t = step(
+        func_actions, non_spatial_logits, spatial_out_logits, non_spatial_action, spatial_action, value_t = step_agent(
             screen, available_actions, available_actions_one_hot)
         observation_new = env.step([func_actions])
         episode_return += observation_new[0].reward
