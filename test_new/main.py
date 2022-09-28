@@ -18,7 +18,7 @@ flags.DEFINE_integer(
     "steps_per_epoch",
     300,
     "How many steps to do while one epoch iteration.")
-flags.DEFINE_integer("epochs", 1000, "Number of epochs for training.")
+flags.DEFINE_integer("epochs", 75, "Number of epochs for training.")
 flags.DEFINE_float("gamma", 0.99, "Discount value for future rewards.")
 flags.DEFINE_float("clip_ratio", 0.2, "Discount value for future rewards.")
 flags.DEFINE_float(
